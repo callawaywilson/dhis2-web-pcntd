@@ -1,0 +1,25 @@
+{
+  "version": "0.1",
+  "name": "PC NTD Data Manager",
+  "short_name": "dhis2-web-pcntd",
+  "description": "DHIS2 Application for managing PC NTD Data & Metadata",
+  "background_color": "#ffffff",
+  "filename": "./manifest.webapp",
+  "launch_path": "/index.html",
+  "appType": "APP",
+  "icons": {
+    "128": "/temp-icon.png"
+  },
+  "default_locale": "en",
+  "activities": {
+    "dhis": {
+      "href": "*",
+      "namespace": "dhis2-web-pcntd"
+    }
+  },
+  "authorities": [
+   "MY_APP_ADD_NEW",
+   "MY_APP_UPDATE",
+   "MY_APP_DELETE"
+  ]
+}
