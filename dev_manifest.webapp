@@ -1,6 +1,6 @@
 {
   "version": "0.1",
-  "name": "PC NTD Data Manager",
+  "name": "PC NTD Data",
   "short_name": "dhis2-web-pcntd",
   "description": "DHIS2 Application for managing PC NTD Data & Metadata",
   "background_color": "#ffffff",

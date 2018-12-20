@@ -1,0 +1,20 @@
+{
+  "launch_path": "index.html",
+  "default_locale": "en",
+  "activities": {
+    "dhis": {
+      "href": "*"
+    }
+  },
+  "appType": "APP",
+  "name": "PC NTD Data Management",
+  "version": "1.0.0",
+  "description": "DHIS2 Application for managing PC NTD Data & Metadata",
+  "developer": {
+    "name": "adam@callawaywilson.com"
+  },
+  "icons": {
+    "48": "icon.png"
+  },
+  "manifest_generated_at": "Thu Dec 20 2018 15:09:09 GMT+0100 (CET)"
+}

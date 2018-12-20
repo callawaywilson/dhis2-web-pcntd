@@ -1,5 +1,29 @@
-.react-div {
-  background-color: #DDD;
-  color: #666;
-  font-size: 16px;
+@import "../node_modules/d2-ui/scss/HeaderBar";
+@import "../node_modules/d2-ui/scss/DataTable";
+
+$left-bar-width: 295px;
+
+html {
+  background: #f3f3f3;
+  font-family: 'Roboto', sans-serif;
+}
+
+.app {
+  padding-top: 3rem;
+}
+
+.left-bar {
+  width: $left-bar-width;
+  position: fixed;
+  bottom: 0;
+  top: 0;
+  left: 0;
+  padding-top: 3rem;
+}
+
+.content-area {
+  padding-left: $left-bar-width;
+  max-width: 750px;
+  min-width: 400px;
+  margin-bottom: 64px;
 }
