@@ -12,54 +12,12 @@ import Button from 'd2-ui/lib/button/Button';
 import { Table, Column, Cell } from 'fixed-data-table';
 
 // App
-// import SelectField from './form-fields/drop-down';
-import AppTheme from './theme';
-
 import Exporter from './service/exporter';
+import TemfUploader from './views/temfUploader'
 
 require('fixed-data-table/dist/fixed-data-table.css');
 
-const styles = {
-    header: {
-        fontSize: 24,
-        fontWeight: 300,
-        color: AppTheme.rawTheme.palette.textColor,
-        padding: '24px 0 12px 16px',
-    },
-    card: {
-        marginTop: 8,
-        marginRight: '1rem',
-        padding: '0 1rem',
-    },
-    cardTitle: {
-        background: AppTheme.rawTheme.palette.primary2Color,
-        height: 62,
-    },
-    cardTitleText: {
-        fontSize: 28,
-        fontWeight: 100,
-        color: AppTheme.rawTheme.palette.alternateTextColor,
-    },
-    noHits: {
-        padding: '1rem',
-        marginTop: '1rem',
-        fontWeight: 300,
-    },
-    userSettingsOverride: {
-        color: AppTheme.rawTheme.palette.primary1Color,
-        position: 'absolute',
-        right: 0,
-        top: 24,
-    },
-    menuIcon: {
-        color: '#757575',
-    },
-    menuLabel: {
-        position: 'relative',
-        top: -6,
-        marginLeft: 16,
-    },
-};
+import styles from './styles'
 
 // Table data as a list of array.
 const rows = [
@@ -69,122 +27,146 @@ const rows = [
 ];
 
 const requiredSqlViews = [
-    'temf-query-2018',
-    'zithromax-app-query-2018'
+  'temf-query-2018',
+  'zithromax-app-query-2018'
 ]
 
 class TemfManager extends React.Component {
 
-    constructor(props, context) {
-        super(props, context);
-        this.state = {
-            loadingSettings: true,
-            sqlViews: {},
-            downloadYear: 2018,
-            loadingDownload: false,
-            loadingUpload: false,
+  constructor(props, context) {
+    super(props, context);
+    this.state = {
+      mode: 'manager',  // manager, upload
+      loadingSettings: true,
+      sqlViews: {},
+      downloadYear: 2018,
+      loadingDownload: false,
+      loadingUpload: false,
+    }
+
+    var self = this;
+    Promise.all([
+      this.loadViews()
+      ]).then((results) => {
+        self.setState({sqlViews: results[0], loadingSettings: false});
+      }) 
+  }
+
+  loadViews() {
+    return new Promise(function(resolve, reject) {
+      var q ='sqlViews?fields=id,displayName,attributeValues&pageSize=10000';
+      d2.Api.getApi().get(q).then(function(results) {
+        var views = {};
+        for (var i = 0; i < results.sqlViews.length; i++) {
+          var view = results.sqlViews[i]
+          for (var j = 0; j < results.sqlViews.length; j++) {
+            if (view.attributeValues[j]) {
+              var index = requiredSqlViews.indexOf(view.attributeValues[j].value);
+              if (index > -1) {
+                views[requiredSqlViews[index]] = view;
+              }
+            }
+          }
         }
+        resolve(views);
+      })
+    });
+  }
 
-        var self = this;
-        Promise.all([
-            this.loadViews()
-        ]).then((results) => {
-            self.setState({sqlViews: results[0], loadingSettings: false});
-        }) 
-    }
+  downloadTemf = (e) => {
+    var self = this;
+    self.setState({loadingDownload: true})
+    var exporter = new Exporter();
+    Promise.all([
+      self.getTemfData(self.state.downloadYear),
+      self.getZithroAppData(self.state.downloadYear)
+      ]).then((results) => {
+        exporter.downloadTemf(2018, {
+          temf: results[0],
+          zithromaxApp: results[1]
+        }, (e) => {
+          self.setState({loadingDownload: false});
+        });   
+      }) 
+  }
+  getTemfData(year) {
+    var id = this.state.sqlViews['temf-query-'+year].id;
+    return this.getSqlViewData(id);
+  }
+  getZithroAppData(year) {
+    var id = this.state.sqlViews['zithromax-app-query-'+year].id;
+    return this.getSqlViewData(id);
+  }
+  getSqlViewData(id) {
+    return new Promise(function(resolve, reject) {
+      var q ='sqlViews/'+id+'/data.json?pageSize=10000';
+      d2.Api.getApi().get(q).then(function(results) {
+        resolve(results.listGrid);
+      });
+    });
+  }
 
-    loadViews() {
-        return new Promise(function(resolve, reject) {
-            var q ='sqlViews?fields=id,displayName,attributeValues&pageSize=10000';
-            d2.Api.getApi().get(q).then(function(results) {
-                var views = {};
-                for (var i = 0; i < results.sqlViews.length; i++) {
-                    var view = results.sqlViews[i]
-                    for (var j = 0; j < results.sqlViews.length; j++) {
-                        if (view.attributeValues[j]) {
-                            var index = requiredSqlViews.indexOf(view.attributeValues[j].value);
-                            if (index > -1) {
-                                views[requiredSqlViews[index]] = view;
-                            }
-                        }
-                    }
-                }
-                resolve(views);
-            })
-        });
-    }
+  uploadTemf = (e) => {
+    this.setState({mode: 'upload'})
+  }
 
-    downloadTemf = (e) => {
-        var self = this;
-        self.setState({loadingDownload: true})
-        var exporter = new Exporter();
-        Promise.all([
-            self.getTemfData(self.state.downloadYear),
-            self.getZithroAppData(self.state.downloadYear)
-        ]).then((results) => {
-            exporter.downloadTemf(2018, {
-                temf: results[0],
-                zithromaxApp: results[1]
-            }, (e) => {
-                self.setState({loadingDownload: false});
-            });   
-        }) 
-    }
-    getTemfData(year) {
-        var id = this.state.sqlViews['temf-query-'+year].id;
-        return this.getSqlViewData(id);
-    }
-    getZithroAppData(year) {
-        var id = this.state.sqlViews['zithromax-app-query-'+year].id;
-        return this.getSqlViewData(id);
-    }
-    getSqlViewData(id) {
-        return new Promise(function(resolve, reject) {
-            var q ='sqlViews/'+id+'/data.json?pageSize=10000';
-            d2.Api.getApi().get(q).then(function(results) {
-                resolve(results.listGrid);
-            });
-        });
-    }
+  renderLoading() {
+    return (
+      <div className="content-area">
+        <div style={styles.header}>
+          TEMF / Zithromax Application Management
+        </div>
+        <Card style={styles.card}>
+          <CardText>
+            <p>Loading settings...</p>
+          </CardText>
+        </Card>
+      </div>
+    ) 
+  }
+
+  renderUpload() {
+    return (
+      <div className="content-area">
+        <div style={styles.header}>
+          TEMF / Zithromax Application Management
+        </div>
+        <TemfUploader cancel={(e)=>{this.setState({mode: 'manager'})}} />
+      </div>
+    ) 
+  }
+
 
 
   render() {
+    if (this.state.loadingSettings) {
+      return this.renderLoading();
+    }
+
+    if (this.state.mode === 'upload') {
+      return this.renderUpload();
+    }
+
     var downloadView;
     if (this.state.loadingDownload) {
-        downloadView = <p>Generating Workbook</p>
+      downloadView = <p>Generating Workbook</p>
     } else {
-        downloadView = (
-            <div>
-                <div>
-                <SelectField floatingLabelText="TEMF Data Year"
-                    value={''+this.state.downloadYear} >
-                    <MenuItem value="2018" primaryText="2018" />
-                </SelectField>
-                </div>
-                <br/>
-                <RaisedButton default
-                    label="Export TEMF/App"
-                    onClick={this.downloadTemf}>
-                </RaisedButton>
-            </div>
-        )
+      downloadView = (
+        <div>
+          <div>
+          <SelectField floatingLabelText="TEMF Data Year"
+            style={{marginRight: '1rem'}}
+            value={''+this.state.downloadYear} >
+            <MenuItem value="2018" primaryText="2018" />
+          </SelectField>
+          <RaisedButton default
+            label="Export TEMF/App"
+            onClick={this.downloadTemf}>
+          </RaisedButton>
+          </div>
+        </div>
+      )
     }
-
-    if (this.state.loadingSettings) {
-        return (
-            <div className="content-area">
-                <div style={styles.header}>
-                    TEMF / Zithromax Application Management
-                    <Card style={styles.card}>
-                    <CardText>
-                        <p>Loading settings...</p>
-                    </CardText>
-                </Card>
-                </div>
-            </div>
-        )
-    }
-
 
     return (
       <div className="content-area">
@@ -195,9 +177,14 @@ class TemfManager extends React.Component {
                 {downloadView}
             </CardText>
         </Card>
+
         <Card style={styles.card}>
           <CardText>
-            <h2>Uploaded Workbooks</h2>
+            <h2 style={{float: 'left'}}>Uploaded Workbooks</h2>
+            <RaisedButton default  style={{float: 'right'}}
+              label="Import TEMF/App"
+              onClick={this.uploadTemf}>
+            </RaisedButton>
             <Table
                 rowHeight={60}
                 rowsCount={rows.length}
