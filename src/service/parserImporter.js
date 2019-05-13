@@ -14,17 +14,20 @@ import AppDataStore from './appDataStore';
 
 const parserRootPath = '../importers/';
 
+class ParserImporter {
 
-class TemfImporter {
-
-  constructor(dataYear, filename, workbook, options, callback) {
+  constructor(dataYear, parser, filename, workbook, options, callback) {
     if (!dataYear || !(typeof dataYear === 'number')) {
       throw "dataYear must be a number";
     }
     if (!workbook) {
       throw "workbook is required";
     }
+    if (!parser) {
+      throw "parser is required";
+    }
     this.dataYear = dataYear;
+    this.parser = parser;
     this.workbook = workbook;
     this.filename = filename;
     this.options = options;
@@ -43,6 +46,7 @@ class TemfImporter {
     }
   }
 
+  // Import the workbook through the parser for the data year
   import() {
     var api = d2.Api.getApi();
 
@@ -62,6 +66,7 @@ class TemfImporter {
     })
   }
 
+  // Load the required data from the org unit tree for the entire system
   loadOrgTree(rootOrgId, orgUnits) {
     this.orgTree = new OrgUnitTreeMapper(orgUnits, {
       geoconnectAttributeID: this.attributeCodes['geoconnect_id'],
@@ -71,7 +76,7 @@ class TemfImporter {
   }
 
   importData() {
-    var parser = AppConfig.parsers[this.dataYear+""]['temf']({
+    var parser = this.parser({
       period: this.dataYear,
       orgUnits: this.orgUnits,
       orgTree: this.orgTree
@@ -97,14 +102,14 @@ class TemfImporter {
     postUrl += 'dryRun=' + (this.options.dryRun ? 'true': false);
 
     api.post(postUrl, mappedValues).then((importSummary) => {
-      console.log(importSummary);
-      this.saveImportLog(mappedValues, importSummary).then((importLog) => {
+      this.saveImportLog(mappedValues, importSummary, this.options.dryRun)
+          .then((importLog) => {
         this.reportState('complete', 100, importLog);
       });
     });   
   }
 
-  saveImportLog(payload, importSummary) {
+  saveImportLog(payload, importSummary, dryRun) {
     var self = this;
     return new Promise(function(resolve, reject) {
       var api = d2.Api.getApi();
@@ -115,18 +120,20 @@ class TemfImporter {
           payload: payload,
           importSummary: importSummary
         }
-        var url = 'dataStore/' + AppConfig.dataStore.logs + '/' + importLog.id;
-        api.post(url, importLog).then((result) => {
-          appDataStore.addUpload(self.dataYear, 'temf', self.filename, importLog)
-            .then((r) => {resolve(importLog)});
-        })
+        if (dryRun) {
+          resolve(importLog);
+        } else {
+          var url = 'dataStore/' + AppConfig.dataStore.logs + '/' + importLog.id;
+          api.post(url, importLog).then((result) => {
+            appDataStore.addUpload(self.dataYear, 'temf', self.filename, importLog)
+              .then((r) => {resolve(importLog)});
+          })
+        }
       })
     });
   }
 
 }
-
-
 
 
 // Utility Methods:
@@ -307,4 +314,4 @@ function empty(data) {
   return count == 0;
 }
 
-export default TemfImporter;
+export default ParserImporter;

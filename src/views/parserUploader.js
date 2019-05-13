@@ -15,28 +15,29 @@ import FlatButton from 'material-ui/FlatButton';
 import Checkbox from 'material-ui/Checkbox';
 
 import AppConfig from '../appConfig';
-import TemfImporter from '../service/temfImporter';
+import ParserImporter from '../service/parserImporter';
 
-import styles from '../styles'
+import styles from '../styles';
 
-const temfYears = AppConfig.temfYears;
-
-class TemfUploader extends React.Component {
+class ParserUploader extends React.Component {
 
   constructor(props, context) {
     super(props, context);
+    var importYears = AppConfig.importYears[props.parserType];
     this.state = {
       uploading: false,
       uploadedFile: null,
       importing: false,
       importingState: null,
       importingProgress: 0,
-      dataYear: temfYears[temfYears.length-1],
+      dataYear: importYears[importYears.length - 1],
+      parserType: props.parserType,
+      parserYears: importYears,
       dryRun: false,
       importLog: null
     }
     this.workbook = null;
-    this.temfImporter = null;
+    this.importer = null;
   }
 
   handleYearChange = (evt, key, payload) => {
@@ -63,7 +64,6 @@ class TemfUploader extends React.Component {
       if(!rABS) data = new Uint8Array(data);
       self.workbook = XLSX.read(data, {type: rABS ? 'binary' : 'array'});
       self.setState({uploading: false, uploadedFile: file});
-      console.log(self.workbook);
     };
     if (rABS) {
       reader.readAsBinaryString(file); 
@@ -78,13 +78,15 @@ class TemfUploader extends React.Component {
 
   process = (e) => {
     this.setState({importing: true, importingState: 'start'});
-    this.temfImporter = new TemfImporter(
+    this.importer = new ParserImporter(
       this.state.dataYear, 
+      AppConfig.parsers[this.state.dataYear+""][this.state.parserType],
       this.state.uploadedFile.name,
       this.workbook, 
       {dryRun: this.state.dryRun},
-      this.importProgess);
-    this.temfImporter.import();
+      this.importProgess
+    );
+    this.importer.import();
   }
 
   importProgess = (state, progress, importLog) => {
@@ -95,8 +97,61 @@ class TemfUploader extends React.Component {
     });
   }
 
+  render() {
+    return (
+      <Card style={styles.card}>
+        <CardText>
+          <h2>{this.props.title}</h2>
+          {this.state.importing ? this.renderImporting() : this.renderDefault()}
+        </CardText>
+        <CardActions>
+          {this.renderButtons()}
+        </CardActions>
+      </Card>
+    )
+  }
+
+  renderDefault() {   
+    const setRef = (ref) => { this.fileInput = ref; };
+    var dataYearMenuItems = [];
+    for (var i = 0; i < this.state.parserYears.length; i++) {
+      dataYearMenuItems.push(
+        <MenuItem key={this.state.parserYears[i]+""}
+          value={this.state.parserYears[i]+""} 
+          primaryText={this.state.parserYears[i]+""} />
+      );
+    }
+    return (
+      <div>
+        <Checkbox
+            label="Dry Run (preview only)"
+            onCheck={this.toggleDryRun}
+            checked={this.state.dryRun} />
+        <br/>
+        <SelectField floatingLabelText="Data Year"
+            value={''+this.state.dataYear}
+            onChange={this.handleYearChange} >
+            {dataYearMenuItems}
+        </SelectField>
+        <br/><br/>
+
+        { 
+          this.state.uploadedFile ? this.renderUploaded() :
+            this.state.uploading ? this.renderUploading() : this.renderUpload()
+        }
+        <input type="file"
+          style={{ visibility: 'hidden', display: 'none' }}
+          ref={setRef}
+          onChange={this.upload} />
+      </div>
+    )
+  }
+
   renderUpload() {
-    return <RaisedButton label="Select Workbook File"  onClick={this.clickUpload} />
+    return (
+      <RaisedButton label="Select Workbook File" 
+        onClick={this.clickUpload} />
+    );
   }
 
   renderUploading() {
@@ -201,42 +256,6 @@ class TemfUploader extends React.Component {
     )
   }
 
-  renderDefault() {   
-    const setRef = (ref) => { this.fileInput = ref; };
-    var dataYearMenuItems = [];
-    for (var i = 0; i < temfYears.length; i++) {
-      dataYearMenuItems.push(
-        <MenuItem key={temfYears[i]+""}
-          value={temfYears[i]+""} 
-          primaryText={temfYears[i]+""} />
-      );
-    }
-    return (
-      <div>
-        <Checkbox
-            label="Dry Run (preview only)"
-            onCheck={this.toggleDryRun}
-            checked={this.state.dryRun} />
-        <br/>
-        <SelectField floatingLabelText="TEMF Data Year"
-            value={''+this.state.dataYear}
-            onChange={this.handleYearChange} >
-            {dataYearMenuItems}
-        </SelectField>
-        <br/><br/>
-
-        { 
-          this.state.uploadedFile ? this.renderUploaded() :
-            this.state.uploading ? this.renderUploading() : this.renderUpload()
-        }
-        <input type="file"
-          style={{ visibility: 'hidden', display: 'none' }}
-          ref={setRef}
-          onChange={this.upload} />
-      </div>
-    )
-  }
-
   renderButtons() {
     if (this.state.importing && this.state.importingState === 'complete') {
       return (
@@ -258,20 +277,6 @@ class TemfUploader extends React.Component {
     }
   }
 
-  render() {
-    return (
-      <Card style={styles.card}>
-        <CardText>
-          <h2>Upload TEMF / Zithromax Application Workbook</h2>
-          {this.state.importing ? this.renderImporting() : this.renderDefault()}
-        </CardText>
-        <CardActions>
-          {this.renderButtons()}
-        </CardActions>
-      </Card>
-    )
-  }
-
 }
 
-export default TemfUploader;
+export default ParserUploader;

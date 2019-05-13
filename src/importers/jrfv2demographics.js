@@ -3,7 +3,8 @@ module.exports = function(_params) {
   let params = Object.assign({
     period: null,
     orgUnits: null,
-    orgTree: null
+    orgTree: null,
+    default: "default",
   }, _params);
 
   let ParserUtils = require('./parser-utils.js')(params);
@@ -181,8 +182,8 @@ module.exports = function(_params) {
             // Population Requiring Treatment - LF
             {
               column: "L",
-              dataElement: "pcn-pop-require-pc",
-              categoryOptionCombo: 'pc-ntd-lf',
+              dataElement: "pcn-pop-require-pc-lf",
+              categoryOptionCombo: 'default',
               mapping: function(value, row) {
                 if (value === 'Unknown') {
                   return 0;
@@ -193,8 +194,8 @@ module.exports = function(_params) {
             // Population Requiring Treatment - Oncho
             {
               column: "M",
-              dataElement: "pcn-pop-require-pc",
-              categoryOptionCombo: 'pc-ntd-ov',
+              dataElement: "pcn-pop-require-pc-ov",
+              categoryOptionCombo: 'default',
               mapping: function(value, row) {
                 if (value === 'Unknown') {
                   return 0;
@@ -205,8 +206,8 @@ module.exports = function(_params) {
             // Population Requiring Treatment - STH
             {
               column: "N",
-              dataElement: "pcn-pop-require-pc",
-              categoryOptionCombo: 'pc-ntd-sth',
+              dataElement: "pcn-pop-require-pc-sth",
+              categoryOptionCombo: 'default',
               mapping: function(value, row) {
                 if (value === 'Unknown') {
                   return 0;
@@ -217,8 +218,8 @@ module.exports = function(_params) {
             // Population Requiring Treatment - SCH
             {
               column: "O",
-              dataElement: "pcn-pop-require-pc",
-              categoryOptionCombo: 'pc-ntd-sch',
+              dataElement: "pcn-pop-require-pc-sch",
+              categoryOptionCombo: 'default',
               mapping: function(value, row) {
                 if (value === 'Unknown') {
                   return 0;

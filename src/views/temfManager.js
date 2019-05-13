@@ -12,19 +12,15 @@ import Button from 'd2-ui/lib/button/Button';
 import { Table, Column, Cell } from 'fixed-data-table';
 
 // App
-import Exporter from './service/exporter';
-import TemfUploader from './views/temfUploader'
+import Exporter from '../service/exporter';
+import ParserUploader from '../views/parserUploader';
+import UploadsTable from '../views/uploadsTable';
+import AppDataStore from '../service/appDataStore';
+import AppConfig from '../appConfig';
 
 require('fixed-data-table/dist/fixed-data-table.css');
 
-import styles from './styles'
-
-// Table data as a list of array.
-const rows = [
-  ['2018', 'temf-2018.xlsx', '2018/11/5'],
-  ['2017', 'temf-2017.xlsx', '2017/12/22'],
-  ['2016', 'temf-2016.xlsx', '2017/1/1']
-];
+import styles from '../styles'
 
 const requiredSqlViews = [
   'temf-query-2018',
@@ -39,17 +35,24 @@ class TemfManager extends React.Component {
       mode: 'manager',  // manager, upload
       loadingSettings: true,
       sqlViews: {},
-      downloadYear: 2018,
+      downloadYear: '2018',
       loadingDownload: false,
       loadingUpload: false,
+      uploads: []
     }
 
     var self = this;
+
     Promise.all([
-      this.loadViews()
-      ]).then((results) => {
-        self.setState({sqlViews: results[0], loadingSettings: false});
-      }) 
+      this.loadViews(),
+      this.loadUploads()
+    ]).then((results) => {
+      self.setState({
+        sqlViews: results[0], 
+        uploads: results[1],
+        loadingSettings: false
+      });
+    }) 
   }
 
   loadViews() {
@@ -73,6 +76,14 @@ class TemfManager extends React.Component {
     });
   }
 
+  loadUploads() {
+    return new Promise(function(resolve, reject) {
+      var api = d2.Api.getApi();
+      var appDataStore = new AppDataStore(d2);
+      appDataStore.getUploadsForType('temf').then(resolve);
+    });
+  }
+
   downloadTemf = (e) => {
     var self = this;
     self.setState({loadingDownload: true})
@@ -81,21 +92,37 @@ class TemfManager extends React.Component {
       self.getTemfData(self.state.downloadYear),
       self.getZithroAppData(self.state.downloadYear)
       ]).then((results) => {
-        exporter.downloadTemf(2018, {
-          temf: results[0],
-          zithromaxApp: results[1]
-        }, (e) => {
+        if (!results[0] || !results[1]) {
           self.setState({loadingDownload: false});
-        });   
+        } else {
+          exporter.downloadTemf(2018, {
+            temf: results[0],
+            zithromaxApp: results[1]
+          }, (e) => {
+            self.setState({loadingDownload: false});
+          });  
+        } 
       }) 
   }
   getTemfData(year) {
-    var id = this.state.sqlViews['temf-query-'+year].id;
-    return this.getSqlViewData(id);
+    var view = this.state.sqlViews['temf-query-'+year];
+    if (view) {
+      var id = view.id;
+      return this.getSqlViewData(id);
+    } else {
+      alert('Unable to find SQL view temf-query-'+year)
+      return false;
+    }
   }
   getZithroAppData(year) {
-    var id = this.state.sqlViews['zithromax-app-query-'+year].id;
-    return this.getSqlViewData(id);
+    var view = this.state.sqlViews['zithromax-app-query-'+year];
+    if (view) {
+      var id = view.id;
+      return this.getSqlViewData(id);
+    } else {
+      alert('Unable to find SQL view zithromax-app-query-'+year);
+      return false;
+    }
   }
   getSqlViewData(id) {
     return new Promise(function(resolve, reject) {
@@ -131,11 +158,41 @@ class TemfManager extends React.Component {
         <div style={styles.header}>
           TEMF / Zithromax Application Management
         </div>
-        <TemfUploader cancel={(e)=>{this.setState({mode: 'manager'})}} />
+        <ParserUploader parserType='temf'
+          title="Upload TEMF / Zithromax Application Workbook"
+          cancel={(e)=>{this.setState({mode: 'manager'})}} 
+        />
       </div>
     ) 
   }
 
+  renderDownload() {
+    if (this.state.loadingDownload) {
+      return <p>Generating Workbook</p>
+    } else {
+      var yearOptions = [];
+      for (var i = 0; i < AppConfig.downloadYears.length; i++) {
+        var year = '' + AppConfig.downloadYears[i];
+        yearOptions.push(<MenuItem key={year} value={year} 
+          primaryText={year} />)
+      }
+      return (
+        <div>
+          <div>
+          <SelectField floatingLabelText="TEMF Data Year"
+            style={{marginRight: '1rem'}}
+            value={''+this.state.downloadYear} >
+            {yearOptions}
+          </SelectField>
+          <RaisedButton default
+            label="Export TEMF/App"
+            onClick={this.downloadTemf}>
+          </RaisedButton>
+          </div>
+        </div>
+      )
+    }
+  }
 
 
   render() {
@@ -147,34 +204,13 @@ class TemfManager extends React.Component {
       return this.renderUpload();
     }
 
-    var downloadView;
-    if (this.state.loadingDownload) {
-      downloadView = <p>Generating Workbook</p>
-    } else {
-      downloadView = (
-        <div>
-          <div>
-          <SelectField floatingLabelText="TEMF Data Year"
-            style={{marginRight: '1rem'}}
-            value={''+this.state.downloadYear} >
-            <MenuItem value="2018" primaryText="2018" />
-          </SelectField>
-          <RaisedButton default
-            label="Export TEMF/App"
-            onClick={this.downloadTemf}>
-          </RaisedButton>
-          </div>
-        </div>
-      )
-    }
-
     return (
       <div className="content-area">
         <div style={styles.header}>TEMF / Zithromax Application Management</div>
         <Card style={styles.card}>
             <CardText>
-                <h2>Download Workbook</h2>
-                {downloadView}
+                <h2>Download Workbook Data</h2>
+                {this.renderDownload()}
             </CardText>
         </Card>
 
@@ -185,52 +221,7 @@ class TemfManager extends React.Component {
               label="Import TEMF/App"
               onClick={this.uploadTemf}>
             </RaisedButton>
-            <Table
-                rowHeight={60}
-                rowsCount={rows.length}
-                width={670}
-                maxHeight={350}
-                headerHeight={40}>
-                <Column
-                  header={<Cell>Year</Cell>}
-                  cell={({rowIndex, ...props}) => (
-                    <Cell {...props}>
-                      {rows[rowIndex][0]}
-                    </Cell>
-                  )}
-                  width={60}
-                />
-                <Column
-                  header={<Cell>File</Cell>}
-                  cell={({rowIndex, ...props}) => (
-                    <Cell {...props}>
-                      <a href="#">{rows[rowIndex][1]}</a>
-                    </Cell>
-                  )}
-                  width={330}
-                />
-                <Column
-                  header={<Cell>Uploaded On</Cell>}
-                  cell={({rowIndex, ...props}) => (
-                    <Cell {...props}>
-                      {rows[rowIndex][2]}
-                    </Cell>
-                  )}
-                  width={120}
-                />
-                <Column
-                  header={<Cell></Cell>}
-                  cell={({rowIndex, ...props}) => (
-                    <Cell {...props}>
-                        <RaisedButton default size="small" fullWidth={false}
-                            label="Export Workbook"
-                            onClick={this.downloadWorkbook}>
-                        </RaisedButton>
-                    </Cell>
-                  )}
-                  width={160}
-                />
-              </Table>
+            <UploadsTable uploadRows={this.state.uploads || []} />
           </CardText>
         </Card>
       </div>

@@ -12,15 +12,17 @@ import Sidebar from 'd2-ui/lib/sidebar/Sidebar.component';
 
 import appTheme from './theme';
 
-import TemfManager from './temfManager';
-import JapManager from './japManager';
+import TemfManager from './views/temfManager';
+import EpirfManager from './views/epirfManager';
+import JrfManager from './views/jrfManager';
 
 const HeaderBar = withStateFrom(headerBarStore$, HeaderBarComponent);
 
 // Sidebar Sections Layout
 const Sections = [
   {key: 'temf', label: 'TEMF / Zithromax App', icon: 'folder'},
-  {key: 'jap', label: 'Joint Application Matrix', icon: 'folder'}
+  {key: 'epirf', label: 'EPIRF', icon: 'folder'},
+  {key: 'jrf', label: 'JRF', icon: 'folder'},
 ]
 
 class Application extends React.Component {
@@ -50,8 +52,10 @@ class Application extends React.Component {
       var page = <div></div>;
       if (this.state.category == 'temf') {
         page = <TemfManager d2={this.props.d2} />
-      } else if (this.state.category == 'jap') {
-        page = <JapManager d2={this.props.d2} />
+      } else if (this.state.category == 'epirf') {
+        page = <EpirfManager d2={this.props.d2} />
+      } else if (this.state.category == 'jrf') {
+        page = <JrfManager d2={this.props.d2} />
       }
 
       return (

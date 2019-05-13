@@ -17,8 +17,8 @@ module.exports = function(_params) {
     sthProgram: "pcn-sthsurvey-event",
     schProgram: "pcn-schsurvey-event",
     rootOrgName: 'Ethiopia',
-    attributeOptionCombo: "HllvX50cXC0",
-    attributeCategoryOptions: "xYerKDKCefk"
+    attributeOptionCombo: "default",
+    attributeCategoryOptions: "default"
   }, _params);
 
   var def = {
@@ -86,7 +86,7 @@ module.exports = function(_params) {
           dataValues: [
             // Type of survey
             {
-              column: "A",
+              column: "D",
               dataElement: "lf-survey-type",
               mapping: function(value, row) {
                 if (value == "Mapping") {
@@ -110,12 +110,12 @@ module.exports = function(_params) {
             },
             // Name of survey site
             {
-              column: "B",
+              column: "C",
               dataElement: "pcn-site-name",
             },
             // Name of administrative (implementation) unit
             {
-              column: "C",
+              column: "B",
               variable: "district",
               mapping: function(value, row) {
                 return getDistrict(value);
@@ -164,7 +164,7 @@ module.exports = function(_params) {
             },
             // Diagnostic Test
             {
-              column: "J",
+              column: "M",
               dataElement: "lf-diagnostic-test",
               mapping: function(value, row) {
                 if (value === "Blood film/counting chamber (mf)") {
@@ -184,7 +184,7 @@ module.exports = function(_params) {
             },
             // Age - Minimum
             {
-              column: "K",
+              column: "N",
               dataElement: "pcn-min-age",
               mapping: function(value, row) {
                 var match = /(\d{2})(\d{2})/.exec(value);
@@ -193,7 +193,7 @@ module.exports = function(_params) {
             },
             // Age - Maximum
             {
-              column: "K",
+              column: "N",
               dataElement: "pcn-max-age",
               mapping: function(value, row) {
                 var match = /(\d{2})(\d{2})/.exec(value);
@@ -202,8 +202,8 @@ module.exports = function(_params) {
             },
             // Survey Site Type
             {
-              column: "L",
-              dataElement: "lf-site-type",
+              column: "P",
+              dataElemeOt: "lf-site-type",
               mapping: function(value, row) {
                 if (value === "School") {
                   return "school";
@@ -213,24 +213,24 @@ module.exports = function(_params) {
               }
             },
             // Survey Methodology 
-            {
-              column: "M",
-              dataElement: "lf-survey-method",
-              mapping: function(value, row) {
-                if (value === "Cluster") {
-                  return "cluster";
-                } else if (value === "Systematic") {
-                  return "systematic";
-                } else if (value === "Census") {
-                  return "census";
-                } else if (value === "Convenience") {
-                  return "convenience";
-                }
-              }
-            },
+            // {
+            //   column: "M",
+            //   dataElement: "lf-survey-method",
+            //   mapping: function(value, row) {
+            //     if (value === "Cluster") {
+            //       return "cluster";
+            //     } else if (value === "Systematic") {
+            //       return "systematic";
+            //     } else if (value === "Census") {
+            //       return "census";
+            //     } else if (value === "Convenience") {
+            //       return "convenience";
+            //     }
+            //   }
+            // },
             // Target sample size
             {
-              column: "N",
+              column: "R",
               dataElement: "pcn-target-sample-size",
               mapping: function(value, row) {
                 if (value) return parseInt(value, 10);
@@ -238,7 +238,7 @@ module.exports = function(_params) {
             },
             // Number of people examined
             {
-              column: "O",
+              column: "S",
               dataElement: "pcn-num-examined",
               mapping: function(value, row) {
                 if (value) return parseInt(value, 10);
@@ -246,7 +246,7 @@ module.exports = function(_params) {
             },
             // Number of people positive
             {
-              column: "P",
+              column: "T",
               dataElement: "pcn-num-positive",
               mapping: function(value, row) {
                 if (value) return parseInt(value, 10);
@@ -254,7 +254,7 @@ module.exports = function(_params) {
             },
             // Number of invalid tests
             {
-              column: "R",
+              column: "V",
               dataElement: "pcn-num-invalid-tests",
               mapping: function(value, row) {
                 if (value) return parseInt(value, 10);
@@ -262,7 +262,7 @@ module.exports = function(_params) {
             },
             // LF Decision
             {
-              column: "S",
+              column: "X",
               dataElement: "lf-decision",
               mapping: function(value, row) {
                 if (value === "Start PC") {
@@ -280,36 +280,36 @@ module.exports = function(_params) {
             },
             // LF - Number of Patients (Lymphoedema)
             {
-              column: "T",
+              column: "Y",
               dataElement: "lf-lym-num-patients",
               mapping: function(value, row) {
                 if (value) return parseInt(value, 10);
               }
             },
-            // LF - Method of Patient Estimation (Lymphoedema)
-            {
-              column: "U",
-              dataElement: "lf-lym-patients-est-method",
-              mapping: function(value, row) {
-                return value;
-              }
-            },
-            // LF - Date of Patient Estimation (Lymphoedema) 
-            {
-              column: "V",
-              dataElement: "lf-lym-patients-est-date",
-              mapping: function(value, row) {
-                if (value) {
-                  var matches = value.match(/(\d{1,2}\/\d{1,2}\/\d{2,4})/);
-                  if (matches && matches.length > 0) {
-                    return moment(matches[0],'MM-DD-YYYY').format('YYYY-MM-DD');
-                  }
-                }
-              }
-            },
+            // // LF - Method of Patient Estimation (Lymphoedema)
+            // {
+            //   column: "U",
+            //   dataElement: "lf-lym-patients-est-method",
+            //   mapping: function(value, row) {
+            //     return value;
+            //   }
+            // },
+            // // LF - Date of Patient Estimation (Lymphoedema) 
+            // {
+            //   column: "V",
+            //   dataElement: "lf-lym-patients-est-date",
+            //   mapping: function(value, row) {
+            //     if (value) {
+            //       var matches = value.match(/(\d{1,2}\/\d{1,2}\/\d{2,4})/);
+            //       if (matches && matches.length > 0) {
+            //         return moment(matches[0],'MM-DD-YYYY').format('YYYY-MM-DD');
+            //       }
+            //     }
+            //   }
+            // },
             // LF - Number of Health Facilities (Lymphoedema) 
             {
-              column: "W",
+              column: "AA",
               dataElement: "lf-lym-service-facilities",
               mapping: function(value, row) {
                 return value;
@@ -317,36 +317,36 @@ module.exports = function(_params) {
             },
             // LF - Number of Patients (Hydrocele)
             {
-              column: "X",
+              column: "AB",
               dataElement: "lf-hc-num-patients",
               mapping: function(value, row) {
                 if (value) return parseInt(value, 10);
               }
             },
-            // LF - Method of Patient Estimation (Lymphoedema)
+            // // LF - Method of Patient Estimation (Lymphoedema)
+            // {
+            //   column: "Y",
+            //   dataElement: "lf-hc-patients-est-method",
+            //   mapping: function(value, row) {
+            //     return value;
+            //   }
+            // },
+            // // LF - Date of Patient Estimation (Lymphoedema) 
+            // {
+            //   column: "Z",
+            //   dataElement: "lf-hc-patients-est-date",
+            //   mapping: function(value, row) {
+            //     if (value) {
+            //       var matches = value.match(/(\d{1,2}\/\d{1,2}\/\d{2,4})/);
+            //       if (matches && matches.length > 0) {
+            //         return moment(matches[0],'MM-DD-YYYY').format('YYYY-MM-DD');
+            //       }
+            //     }
+            //   }
+            // },
+            // LF - Number of Health Facilities (Hydrocele) 
             {
-              column: "Y",
-              dataElement: "lf-hc-patients-est-method",
-              mapping: function(value, row) {
-                return value;
-              }
-            },
-            // LF - Date of Patient Estimation (Lymphoedema) 
-            {
-              column: "Z",
-              dataElement: "lf-hc-patients-est-date",
-              mapping: function(value, row) {
-                if (value) {
-                  var matches = value.match(/(\d{1,2}\/\d{1,2}\/\d{2,4})/);
-                  if (matches && matches.length > 0) {
-                    return moment(matches[0],'MM-DD-YYYY').format('YYYY-MM-DD');
-                  }
-                }
-              }
-            },
-            // LF - Number of Health Facilities (Lymphoedema) 
-            {
-              column: "AA",
+              column: "AD",
               dataElement: "lf-hc-service-facilities",
               mapping: function(value, row) {
                 return value;
@@ -354,7 +354,7 @@ module.exports = function(_params) {
             },
             // Comments
             { 
-              column: "AB",
+              column: "AE",
               variable: "comments"
             }
           ]
@@ -535,6 +535,382 @@ module.exports = function(_params) {
               dataElement: "ov-pct-poolscreen-pos",
               mapping: function(value, row) {
                 if (value) return parseFloat(value);
+              }
+            }
+          ]
+        }
+      },
+
+      // STH Sheet
+      {
+        names: [/STH/],
+        startRow: 8,
+        params: params,
+        row: {
+          event: {
+            program: params.sthProgram,
+            attributeOptionCombo: params.attributeOptionCombo,
+            attributeCategoryOptions: params.attributeCategoryOptions,
+            status: "COMPLETED",
+            eventDate: function(row) {
+              var date = getRowVariables(row)['surveydate'];
+              if (!date) {
+                return moment(new Date(params.period,0,1)).format('YYYY-MM-DD');
+              } else {
+                return date;
+              }
+            },
+            orgUnit: function(row) {
+              var district = getRowVariables(row)['district'];
+              if (district) return district.id;
+            },
+            orgUnitName: function(row) {
+              var district = getRowVariables(row)['district'];
+              if (district) return district.name;
+            },
+            coordinate: function(row) {
+              var lat = getRowVariables(row)['latitude'];
+              var lon = getRowVariables(row)['longitude'];
+              if (lat && lon) {
+                return {
+                  latitude: lat,
+                  longitude: lon
+                }
+              }
+            },
+            notes: function(row) {
+              var comments = getRowVariables(row)['comments'];
+              if (comments) {
+                return [{value: comments}]
+              }
+            },
+          },
+          invariants: {
+
+          },
+          dataValues: [
+            // Type of survey - not in 2015
+            // {
+            //   column: "A",
+            //   dataElement: "sth-survey-type",
+            //   mapping: function(value, row) {
+            //     if (value == "Mapping") {
+            //       return "mapping";
+            //     } else if (value == "Sentinel site") {
+            //       return "sentinel";
+            //     } else if (value == "With TAS") {
+            //       return "withtas";
+            //     } else if (value == "Other") {
+            //       return "other";
+            //     }
+            //   }
+            // },
+            // Name of administrative (implementation) unit
+            {
+              column: "A",
+              variable: "district",
+              mapping: function(value, row) {
+                return getDistrict(value);
+              }
+            },
+            // Date of Survey
+            {
+              column: "C",
+              variable: "surveydate",
+              mapping: function(value, row) {
+                var d = moment(value, 'MMMM YYYY', true);
+                if (!d || !d.isValid()) 
+                  d = moment(value + ' ' + params.period, 'MMMM YYYY' );
+                return d.format('YYYY-MM-DD');
+              }
+            },
+            // Latitude
+            { 
+              column: "D",
+              variable: "latitude"
+            },
+            // Longitude
+            { 
+              column: "E",
+              variable: "longitude"
+            },
+            // Age - Minimum
+            {
+              column: "G",
+              dataElement: "pcn-min-age",
+              mapping: function(value, row) {
+                var match = /(\d{2})(\d{2})/.exec(value);
+                if (match && match[1]) return parseInt(match[1],10)
+              }
+            },
+            // Age - Maximum
+            {
+              column: "G",
+              dataElement: "pcn-max-age",
+              mapping: function(value, row) {
+                var match = /(\d{2})(\d{2})/.exec(value);
+                if (match && match[2]) return parseInt(match[2],10)
+              }
+            },
+            // Ascaris - Number People Examined
+            {
+              column: "H",
+              dataElement: "sth-ascaris-num-people-examined",
+              mapping: function(value) {
+                return parseInt(value, 10);
+              }
+            },
+            // Ascaris - Number People Positive
+            {
+              column: "I",
+              dataElement: "sth-ascaris-num-people-pos",
+              mapping: function(value) {
+                return parseInt(value, 10);
+              }
+            },
+            // Ascaris - % Moderate Infection
+            {
+              column: "L",
+              dataElement: "sth-ascaris-pct-moderate-infection",
+              mapping: function(value) {
+                return parseFloat(value);
+              }
+            },
+            // Ascaris - % Heavy Infection
+            {
+              column: "K",
+              dataElement: "sth-ascaris-pct-heavy-infection",
+              mapping: function(value) {
+                return parseFloat(value);
+              }
+            },
+
+            // Hookworm - Number People Examined
+            {
+              column: "M",
+              dataElement: "sth-hookworm-num-people-examined",
+              mapping: function(value) {
+                return parseInt(value, 10);
+              }
+            },
+            // Hookworm - Number People Positive
+            {
+              column: "N",
+              dataElement: "sth-hookworm-num-people-pos",
+              mapping: function(value) {
+                return parseInt(value, 10);
+              }
+            },
+            // Hookworm - % Moderate Infection
+            {
+              column: "Q",
+              dataElement: "sth-hookworm-pct-moderate-infection",
+              mapping: function(value) {
+                return parseFloat(value);
+              }
+            },
+            // Hookworm - % Heavy Infection
+            {
+              column: "P",
+              dataElement: "sth-hookworm-pct-heavy-infection",
+              mapping: function(value) {
+                return parseFloat(value);
+              }
+            },
+
+            // Trichuris - Number People Examined
+            {
+              column: "R",
+              dataElement: "sth-trichuris-num-people-examined",
+              mapping: function(value) {
+                return parseInt(value, 10);
+              }
+            },
+            // Trichuris - Number People Positive
+            {
+              column: "S",
+              dataElement: "sth-trichuris-num-people-pos",
+              mapping: function(value) {
+                return parseInt(value, 10);
+              }
+            },
+            // Trichuris - % Moderate Infection
+            {
+              column: "V",
+              dataElement: "sth-trichuris-pct-moderate-infection",
+              mapping: function(value) {
+                return parseFloat(value);
+              }
+            },
+            // Trichuris - % Heavy Infection
+            {
+              column: "U",
+              dataElement: "sth-trichuris-pct-heavy-infection",
+              mapping: function(value) {
+                return parseFloat(value);
+              }
+            }
+          ]
+        }
+      },
+
+      // SCH Sheet
+      {
+        names: [/SCH/],
+        startRow: 8,
+        params: params,
+        row: {
+          event: {
+            program: params.schProgram,
+            attributeOptionCombo: params.attributeOptionCombo,
+            attributeCategoryOptions: params.attributeCategoryOptions,
+            status: "COMPLETED",
+            eventDate: function(row) {
+              var date = getRowVariables(row)['surveydate'];
+              if (!date) {
+                return moment(new Date(params.period,0,1)).format('YYYY-MM-DD');
+              } else {
+                return date;
+              }
+            },
+            orgUnit: function(row) {
+              var district = getRowVariables(row)['district'];
+              if (district) return district.id;
+            },
+            orgUnitName: function(row) {
+              var district = getRowVariables(row)['district'];
+              if (district) return district.name;
+            },
+            coordinate: function(row) {
+              var lat = getRowVariables(row)['latitude'];
+              var lon = getRowVariables(row)['longitude'];
+              if (lat && lon) {
+                return {
+                  latitude: lat,
+                  longitude: lon
+                }
+              }
+            },
+            notes: function(row) {
+              var comments = getRowVariables(row)['comments'];
+              if (comments) {
+                return [{value: comments}]
+              }
+            },
+          },
+          invariants: {
+
+          },
+          dataValues: [
+            // Name of administrative (implementation) unit
+            {
+              column: "A",
+              variable: "district",
+              mapping: function(value, row) {
+                return getDistrict(value);
+              }
+            },
+            // Date of Survey
+            {
+              column: "C",
+              variable: "surveydate",
+              mapping: function(value, row) {
+                var d = moment(value, 'MMMM YYYY', true);
+                if (!d || !d.isValid()) 
+                  d = moment(value + ' ' + params.period, 'MMMM YYYY' );
+                return d.format('YYYY-MM-DD');
+              }
+            },
+            // Latitude
+            { 
+              column: "D",
+              variable: "latitude"
+            },
+            // Longitude
+            { 
+              column: "E",
+              variable: "longitude"
+            },
+            // Age - Minimum
+            {
+              column: "G",
+              dataElement: "pcn-min-age",
+              mapping: function(value, row) {
+                var match = /(\d{2})(\d{2})/.exec(value);
+                if (match && match[1]) return parseInt(match[1],10)
+              }
+            },
+            // Age - Maximum
+            {
+              column: "G",
+              dataElement: "pcn-max-age",
+              mapping: function(value, row) {
+                var match = /(\d{2})(\d{2})/.exec(value);
+                if (match && match[2]) return parseInt(match[2],10)
+              }
+            },
+            // SCH - Urinary - Number People Examined
+            {
+              column: "H",
+              dataElement: "sch-urn-num-people-examined",
+              mapping: function(value) {
+                return parseInt(value, 10);
+              }
+            },
+            // SCH - Urinary - Number People Positive
+            {
+              column: "I",
+              dataElement: "sch-urn-num-people-pos",
+              mapping: function(value) {
+                return parseInt(value, 10);
+              }
+            },
+            // SCH - Urinary - % Low Infection
+            {
+              column: "L",
+              dataElement: "sch-urn-pct-moderate-infection",
+              mapping: function(value) {
+                return parseFloat(value);
+              }
+            },
+            // SCH - Urinary - % Heavy Infection
+            {
+              column: "K",
+              dataElement: "sch-urn-pct-heavy-infection",
+              mapping: function(value) {
+                return parseFloat(value);
+              }
+            },
+            // SCH - Intestinal - Number People Examined
+            {
+              column: "M",
+              dataElement: "sch-intestinal-num-people-examined",
+              mapping: function(value) {
+                return parseInt(value, 10);
+              }
+            },
+            // SCH - Intestinal - Number People Positive
+            {
+              column: "N",
+              dataElement: "sch-intestinal-num-people-pos",
+              mapping: function(value) {
+                return parseInt(value, 10);
+              }
+            },
+            // SCH - Intestinal - % Low Infection
+            {
+              column: "Q",
+              dataElement: "sch-intestinal-pct-moderate-infection",
+              mapping: function(value) {
+                return parseFloat(value);
+              }
+            },
+            // SCH - Intestinal - % Heavy Infection
+            {
+              column: "P",
+              dataElement: "sch-intestinal-pct-heavy-infection",
+              mapping: function(value) {
+                return parseFloat(value);
               }
             }
           ]

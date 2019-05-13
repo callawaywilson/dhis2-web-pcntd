@@ -26,12 +26,24 @@ class AppDataStore {
       var uploadUrl = 'dataStore/' + AppConfig.dataStore.data + "/" + type;
       api.get(uploadUrl).then((data) => {
         if (!data.uploads) data.uploads = [];
-        data.uploads.push(upload);
+        data.uploads.unshift(upload);
         api.update(uploadUrl, data).then(resolve);
       }).catch((err) => {
         var data = {uploads: [upload]};
         api.post(uploadUrl, data).then(resolve);
       })
+    });
+  }
+
+  getUploadsForType(type) {
+    return new Promise(function(resolve, reject) {
+      var api = d2.Api.getApi();
+      var uploadUrl = 'dataStore/' + AppConfig.dataStore.data + "/" + type;
+      api.get(uploadUrl).then((data) => {
+        resolve(data.uploads)  
+      }).catch((err) => {
+        resolve([]);
+      });
     });
   }
 
